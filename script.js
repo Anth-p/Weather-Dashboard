@@ -122,3 +122,91 @@ function getWeather(data) {
         })
     return;
 }
+
+// use Open Weather 'Current weather data (API)' to get city coordinates to then send to 'One Call API' to get weather
+function getCoordinates () {
+    var requestUrl = `https://api.openweathermap.org/data/2.5/weather?q=${currentCity}&appid=${APIkey}`;
+    var storedCities = JSON.parse(localStorage.getItem("cities")) || [];
+
+    fetch(requestUrl)
+      .then(function (response) {
+        if (response.status >= 200 && response.status <= 299) {
+            return response.json();
+          } else {
+            throw Error(response.statusText);
+          }
+      })
+      .then(function(data) {
+ 
+        var cityInfo = {
+            city: currentCity,
+            lon: data.coord.lon,
+            lat: data.coord.lat
+        }
+
+        storedCities.push(cityInfo);
+        localStorage.setItem("cities", JSON.stringify(storedCities));
+
+        displaySearchHistory();
+
+        return cityInfo;
+      })
+      .then(function (data) {
+        getWeather(data);
+      })
+      return;
+}
+
+// Display search history as buttons
+function displaySearchHistory() {
+    var storedCities = JSON.parse(localStorage.getItem("cities")) || [];
+    var pastSearchesEl = document.getElementById('past-searches');
+
+    pastSearchesEl.innerHTML ='';
+
+    for (i = 0; i < storedCities.length; i++) {
+        
+        var pastCityBtn = document.createElement("button");
+        pastCityBtn.classList.add("btn", "btn-primary", "my-2", "past-city");
+        pastCityBtn.setAttribute("style", "width: 100%");
+        pastCityBtn.textContent = `${storedCities[i].city}`;
+        pastSearchesEl.appendChild(pastCityBtn);
+    }
+    return;
+}
+
+// CLear search history //
+function handleClearHistory (event) {
+    event.preventDefault();
+    var pastSearchesEl = document.getElementById('past-searches');
+
+    localStorage.removeItem("cities");
+    pastSearchesEl.innerHTML ='';
+
+    return;
+}
+
+function clearCurrentCityWeather () {
+    var currentConditionsEl = document.getElementById("currentConditions");
+    currentConditionsEl.innerHTML = '';
+
+    var fiveDayForecastHeaderEl = document.getElementById("fiveDayForecastHeader");
+    fiveDayForecastHeaderEl.innerHTML = '';
+
+    var fiveDayForecastEl = document.getElementById("fiveDayForecast");
+    fiveDayForecastEl.innerHTML = '';
+
+    return;
+}
+
+// handle submit of city name by trimming and sending to getCoordinates function, clear HTML display of past weather data, cards, titles
+function handleCityFormSubmit (event) {
+    event.preventDefault();
+    currentCity = cityInputEl.val().trim();
+
+    clearCurrentCityWeather();
+    getCoordinates();
+
+    return;
+}
+
