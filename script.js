@@ -210,3 +210,39 @@ function handleCityFormSubmit (event) {
     return;
 }
 
+// Previously searched  
+
+function getPastCity (event) {
+    var element = event.target;
+
+    if (element.matches(".past-city")) {
+        currentCity = element.textContent;
+        
+        clearCurrentCityWeather();
+
+        var requestUrl = `https://api.openweathermap.org/data/2.5/weather?q=${currentCity}&appid=${APIkey}`;
+        
+        fetch(requestUrl)
+          .then(function (response) {
+            if (response.status >= 200 && response.status <= 299) {
+                return response.json();
+              } else {
+                throw Error(response.statusText);
+              }
+           })
+           .then(function(data) {
+                var cityInfo = {
+                    city: currentCity,
+                    lon: data.coord.lon,
+                    lat: data.coord.lat
+                }
+                return cityInfo;
+            })
+           .then(function (data) {
+                getWeather(data);
+        })
+    }
+    return;
+}
+
+displaySearchHistory();
