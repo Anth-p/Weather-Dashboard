@@ -246,3 +246,11 @@ function getPastCity (event) {
 }
 
 displaySearchHistory();
+
+// buttons
+
+searchBtn.on("click", handleCityFormSubmit);
+
+clearBtn.on("click", handleClearHistory);
+
+pastSearchedCitiesEl.on("click", getPastCity);
